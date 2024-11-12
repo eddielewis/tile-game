@@ -15,6 +15,10 @@
             init();
         };
 
+        var cameraOffsetX = 0;
+        var cameraOffsetY = 0;
+        var cameraSpeed = 10;
+
         class GameMap {
             constructor() {
                 this.map = new Map();
@@ -163,7 +167,7 @@
 
                 var [frameX, frameY, spriteWidth, spriteHeight] = this.texture.getBoundingRect();
 
-                ctx.drawImage(img,
+                drawImageCameraOffset(img,
                     frameX, frameY, spriteWidth, spriteHeight,
                     OFFSET + canvasX - (HEX_WIDTH / 2), OFFSET + canvasY - (HEX_HEIGHT / 2), HEX_WIDTH, HEX_HEIGHT);
             }
@@ -184,6 +188,12 @@
             ctx.drawImage(img,
                 frameX * HEX_WIDTH, frameY * HEX_HEIGHT, HEX_WIDTH, HEX_HEIGHT,
                 OFFSET + canvasX - (HEX_WIDTH / 2), OFFSET + canvasY - (HEX_HEIGHT / 2), HEX_WIDTH, HEX_HEIGHT);
+        }
+
+        function drawImageCameraOffset(img, sx, sy, sw,sh,dx,dy,dw,dh) {
+            dx += cameraOffsetX;
+            dy += cameraOffsetY;
+            ctx.drawImage(img, sx, sy, sw,sh,dx,dy,dw,dh);
         }
 
         function drawTile(hex, tile) {
@@ -224,6 +234,7 @@
             addEventListener("click", (event) => {
                 let hex = clickHex(event, canvas);
                 var tile = map.getTile(hex);
+                if (!tile) return;
 
                 tile.setTexture(new Texture(0, 1));
                 // map.setTile(hex, tile);
@@ -231,6 +242,25 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 map.draw()
             });
+            addEventListener("keydown", (event) => {
+                // TODO: repeated key shouldn't be interrupted by different keypress
+                switch(event.key) {
+                    case 'w':
+                        cameraOffsetY += cameraSpeed;
+                        break;
+                    case 'a':
+                        cameraOffsetX -= cameraSpeed;
+                        break;
+                    case 's':
+                        cameraOffsetY -= cameraSpeed;
+                        break;
+                    case 'd':
+                        cameraOffsetX += cameraSpeed;
+                        break;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                map.draw();
+            })
         }
     </script>
 </body>
